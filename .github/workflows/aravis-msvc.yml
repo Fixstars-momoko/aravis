@@ -22,12 +22,9 @@ jobs:
     - name: pip
       run: |
         pip install conan
-    - name: uninstall
-      run: |
-        Get-AppxPackage *strawberry*
     - name: perl
       run: |
-        gcm Pkg-config
+        Get-Package Pkg-config 
     - name: checkout
       uses: actions/checkout@v2
     - name: conan
