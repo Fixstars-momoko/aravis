@@ -24,7 +24,7 @@ jobs:
         pip install conan
     - name: perl
       run: |
-        Get-Package "Perl *"
+        Get-Package "Perl"
     - name: checkout
       uses: actions/checkout@v2
     - name: conan
