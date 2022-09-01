@@ -52,7 +52,6 @@ jobs:
           virtualrunenv
 
           [options]
-          pkgconf:shared=True
           glib:shared=True
           gstreamer:shared=True
           gst-plugins-base:shared=True
