@@ -24,7 +24,7 @@ jobs:
         pip install conan
     - name: uninstall
       run: |
-        Get-Package -Name "Strawberry Perl*" | Uninstall-Package
+        Get-AppxPackage *strawberry*
     - name: perl
       run: |
         gcm Pkg-config
