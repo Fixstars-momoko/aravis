@@ -22,9 +22,9 @@ jobs:
     - name: pip
       run: |
         pip install conan
-    - name: perl
+    - name: disable-perl
       run: |
-        Get-Package -Name "Strawberry Perl 5.32.1.1*"
+        rm -r C:\Strawberry\perl
     - name: checkout
       uses: actions/checkout@v2
     - name: conan
