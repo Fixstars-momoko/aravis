@@ -22,7 +22,9 @@ jobs:
     - name: pip
       run: |
         pip install conan
-        echo ${PATH}
+    - name: perl
+      run: |
+        echo "${PATH}"
     - name: checkout
       uses: actions/checkout@v2
     - name: conan
