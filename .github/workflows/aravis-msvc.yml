@@ -33,7 +33,7 @@ jobs:
           [requires]
           libiconv/1.17
           glib/2.70.0
-          #gobject-introspection/1.69.0
+          gobject-introspection/1.69.0
           gstreamer/1.19.1
           gst-plugins-base/1.19.1
           #gtk/4.4.0
