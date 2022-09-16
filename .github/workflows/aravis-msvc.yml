@@ -36,7 +36,7 @@ jobs:
           #gobject-introspection/1.69.0
           gstreamer/1.19.1
           gst-plugins-base/1.19.1
-          gtk/4.4.0
+          gtk/3.24.24
           libxml2/2.9.12
           zlib/1.2.11
           libusb/1.0.24
