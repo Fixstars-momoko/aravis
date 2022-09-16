@@ -2,7 +2,7 @@ name: Aravis-MSVC
 
 on:
   push:
-    branches: [ main ]
+    branches: [ feature/ci-test ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
