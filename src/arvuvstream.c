@@ -573,6 +573,7 @@ arv_uv_stream_thread_sync (void *data)
                                                 buffer->priv->received_size = 0;
 						buffer->priv->payload_type = arv_uvsp_packet_get_buffer_payload_type
                                                         (packet, &buffer->priv->has_chunks);
+						// printf("arvuvstream.c\t payload_type %i\n", buffer->priv->payload_type);
 						buffer->priv->chunk_endianness = G_LITTLE_ENDIAN;
 						if (buffer->priv->payload_type == ARV_BUFFER_PAYLOAD_TYPE_IMAGE ||
 						    buffer->priv->payload_type == ARV_BUFFER_PAYLOAD_TYPE_EXTENDED_CHUNK_DATA) {
@@ -647,6 +648,9 @@ arv_uv_stream_thread_sync (void *data)
                                                                         packet, transferred);
                                                         offset += transferred;
                                                         thread_data->statistics.n_transferred_bytes += transferred;
+														if (buffer->priv->payload_type == ARV_BUFFER_PAYLOAD_TYPE_GENDC_CONTAINER){
+															printf("received\n");
+														}
                                                 } else {
                                                         buffer->priv->status = ARV_BUFFER_STATUS_SIZE_MISMATCH;
                                                         thread_data->statistics.n_ignored_bytes += transferred;
