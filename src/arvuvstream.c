@@ -649,7 +649,7 @@ arv_uv_stream_thread_sync (void *data)
                                                         offset += transferred;
                                                         thread_data->statistics.n_transferred_bytes += transferred;
 														if (buffer->priv->payload_type == ARV_BUFFER_PAYLOAD_TYPE_GENDC_CONTAINER){
-															printf("received\n");
+															printf("signature = %.4s\n", buffer->priv->data);
 														}
                                                 } else {
                                                         buffer->priv->status = ARV_BUFFER_STATUS_SIZE_MISMATCH;
