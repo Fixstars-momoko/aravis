@@ -649,7 +649,13 @@ arv_uv_stream_thread_sync (void *data)
                                                         offset += transferred;
                                                         thread_data->statistics.n_transferred_bytes += transferred;
 														if (buffer->priv->payload_type == ARV_BUFFER_PAYLOAD_TYPE_GENDC_CONTAINER){
-															printf("signature = %.4s\n", buffer->priv->data);
+															if (strncmp(buffer->priv->data, "GNDC", 4) == 0){
+																int32_t* descriptor_size = (int*)malloc(sizeof(int));
+																memcpy ((char*)(descriptor_size), buffer->priv->data+48, 4);
+																printf("DescriptorSize = %i\n", *descriptor_size);
+															}else{
+																arv_warning_sp ("Invalid GenDC Container: Signature shows %.4s", buffer->priv->data);
+															}
 														}
                                                 } else {
                                                         buffer->priv->status = ARV_BUFFER_STATUS_SIZE_MISMATCH;

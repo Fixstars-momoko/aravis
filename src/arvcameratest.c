@@ -588,11 +588,12 @@ main (int argc, char **argv)
 			if (error == NULL) payload = arv_camera_get_payload (camera, &error);
 			// =============================================================
 			// since payload size is 0, i just set it manually for debug
-			gint image_size = 1920 * 1080 * 2;
-			gint descriptor_size = (96 - 32 + 56 + 72)/8;
+			gint image_size = 0x1FA400;
+			gint descriptor_size = 0x500;
 			payload = image_size + descriptor_size;
 			printf("=========================================================\n");
 			printf("arvcameratest.c\tSince the payload size on GenICam features is 0, manually set to %i\n", payload);
+			printf("\tDescriptorSize = %i\n", descriptor_size);
 			printf("=========================================================\n");
 			// =============================================================
 
@@ -656,10 +657,6 @@ main (int argc, char **argv)
                     }
 
 		    if (ARV_IS_STREAM (stream)) {
-				// =============================================================
-				// camera is U3V
-				printf("arvcameratest.c ARV_IS_STREAM (stream)\n");
-				// =============================================================
 			    if (ARV_IS_GV_STREAM (stream)) {
 				    if (arv_option_auto_socket_buffer)
 					    g_object_set (stream,
@@ -680,9 +677,7 @@ main (int argc, char **argv)
 						  "packet-timeout", (unsigned) arv_option_packet_timeout * 1000,
 						  "frame-retention", (unsigned) arv_option_frame_retention * 1000,
 						  NULL);
-			    }else{
-					printf("                !ARV_IS_GV_STREAM (stream)\n");
-				}
+			    }
 
 			    for (i = 0; i < 50; i++)
 				    arv_stream_push_buffer (stream, arv_buffer_new (payload, NULL));
