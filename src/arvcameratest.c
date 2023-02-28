@@ -592,8 +592,7 @@ main (int argc, char **argv)
 			gint descriptor_size = 0x500;
 			payload = image_size + descriptor_size;
 			printf("=========================================================\n");
-			printf("arvcameratest.c\tSince the payload size on GenICam features is 0, manually set to %i\n", payload);
-			printf("\tDescriptorSize = %i\n", descriptor_size);
+			printf("arvcameratest.c\n\tSince the payload size on GenICam features is 0,\n\tmanually set to %i\n", payload);
 			printf("=========================================================\n");
 			// =============================================================
 

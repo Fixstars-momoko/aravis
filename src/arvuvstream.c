@@ -36,6 +36,8 @@
 #include <libusb.h>
 #include <string.h>
 
+#include <stdio.h>
+
 #define ARV_UV_STREAM_MAXIMUM_TRANSFER_SIZE	(1024*1024*1)
 #define ARV_UV_STREAM_MAXIMUM_SUBMIT_TOTAL	(8*1024*1024)
 
@@ -650,9 +652,12 @@ arv_uv_stream_thread_sync (void *data)
                                                         thread_data->statistics.n_transferred_bytes += transferred;
 														if (buffer->priv->payload_type == ARV_BUFFER_PAYLOAD_TYPE_GENDC_CONTAINER){
 															if (strncmp(buffer->priv->data, "GNDC", 4) == 0){
-																int32_t* descriptor_size = (int*)malloc(sizeof(int));
-																memcpy ((char*)(descriptor_size), buffer->priv->data+48, 4);
-																printf("DescriptorSize = %i\n", *descriptor_size);
+																FILE * fp;
+																const char* file_location = "dumped-gendc.bin";
+																fp = fopen(file_location, "w");
+																fwrite(buffer->priv->data, sizeof(char*), transferred, fp);
+																fclose(fp);
+																// printf("*");
 															}else{
 																arv_warning_sp ("Invalid GenDC Container: Signature shows %.4s", buffer->priv->data);
 															}
