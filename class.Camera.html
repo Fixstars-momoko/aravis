@@ -73,7 +73,7 @@ SPDX-License-Identifier: LGPL-2.1-or-later
         <h3><a href="index.html">Aravis</a></h3>
         <p>API Version: 0.8</p>
         
-        <p>Library Version: 0.8.26</p>
+        <p>Library Version: 0.8.30</p>
         
       </div>
       
@@ -118,6 +118,8 @@ SPDX-License-Identifier: LGPL-2.1-or-later
   
     <a class="method" href="method.Camera.create_stream_full.html">create_stream_full</a>
   
+    <a class="method" href="method.Camera.dup_available_black_levels.html">dup_available_black_levels</a>
+  
     <a class="method" href="method.Camera.dup_available_components.html">dup_available_components</a>
   
     <a class="method" href="method.Camera.dup_available_enumerations.html">dup_available_enumerations</a>
@@ -125,6 +127,8 @@ SPDX-License-Identifier: LGPL-2.1-or-later
     <a class="method" href="method.Camera.dup_available_enumerations_as_display_names.html">dup_available_enumerations_as_display_names</a>
   
     <a class="method" href="method.Camera.dup_available_enumerations_as_strings.html">dup_available_enumerations_as_strings</a>
+  
+    <a class="method" href="method.Camera.dup_available_gains.html">dup_available_gains</a>
   
     <a class="method" href="method.Camera.dup_available_pixel_formats.html">dup_available_pixel_formats</a>
   
@@ -308,7 +312,11 @@ SPDX-License-Identifier: LGPL-2.1-or-later
   
     <a class="method" href="method.Camera.select_and_enable_component.html">select_and_enable_component</a>
   
+    <a class="method" href="method.Camera.select_black_level.html">select_black_level</a>
+  
     <a class="method" href="method.Camera.select_component.html">select_component</a>
+  
+    <a class="method" href="method.Camera.select_gain.html">select_gain</a>
   
     <a class="method" href="method.Camera.set_access_check_policy.html">set_access_check_policy</a>
   
@@ -339,6 +347,8 @@ SPDX-License-Identifier: LGPL-2.1-or-later
     <a class="method" href="method.Camera.set_frame_count.html">set_frame_count</a>
   
     <a class="method" href="method.Camera.set_frame_rate.html">set_frame_rate</a>
+  
+    <a class="method" href="method.Camera.set_frame_rate_enable.html">set_frame_rate_enable</a>
   
     <a class="method" href="method.Camera.set_gain.html">set_gain</a>
   
@@ -431,8 +441,9 @@ SPDX-License-Identifier: LGPL-2.1-or-later
           
         </h4>
 
-        <pre><code>class Aravis.Camera : GObject.Object {
-  parent_instance: GObject
+        <pre><code>class Aravis.Camera : GObject.Object
+  implements Gio.Initable {
+  /* No available fields */
 }</pre></code>
 
         <div class="docblock">
@@ -611,6 +622,16 @@ first available&nbsp;camera.</p>
         </div>
       
         <div class="">
+          <h6><a href="method.Camera.dup_available_black_levels.html">arv_camera_dup_available_black_levels</a></h6>
+          <div class="docblock">
+            <p>Retrieves the list of all available black level selectors as&nbsp;strings.</p>
+          </div>
+          <div class="docblock">
+            <p><span class="emblem available">since: 0.8.27</span></p>
+          </div>
+        </div>
+      
+        <div class="">
           <h6><a href="method.Camera.dup_available_components.html">arv_camera_dup_available_components</a></h6>
           <div class="docblock">
             <p>Retrieves the list of available&nbsp;components.</p>
@@ -647,6 +668,16 @@ first available&nbsp;camera.</p>
           </div>
           <div class="docblock">
             <p><span class="emblem available">since: 0.8.0</span></p>
+          </div>
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Camera.dup_available_gains.html">arv_camera_dup_available_gains</a></h6>
+          <div class="docblock">
+            <p>Retrieves the list of all available gain selectors as&nbsp;strings.</p>
+          </div>
+          <div class="docblock">
+            <p><span class="emblem available">since: 0.8.27</span></p>
           </div>
         </div>
       
@@ -1573,12 +1604,32 @@ set before the call to&nbsp;arv_camera_create_stream().</p>
         </div>
       
         <div class="">
+          <h6><a href="method.Camera.select_black_level.html">arv_camera_select_black_level</a></h6>
+          <div class="docblock">
+            <p>Configures Black Level Selector&nbsp;feature.</p>
+          </div>
+          <div class="docblock">
+            <p><span class="emblem available">since: 0.8.27</span></p>
+          </div>
+        </div>
+      
+        <div class="">
           <h6><a href="method.Camera.select_component.html">arv_camera_select_component</a></h6>
           <div class="docblock">
             <p>Select and enable or disable the given <code>component</code>.</p>
           </div>
           <div class="docblock">
             <p><span class="emblem available">since: 0.8.25</span></p>
+          </div>
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Camera.select_gain.html">arv_camera_select_gain</a></h6>
+          <div class="docblock">
+            <p>Configures Gain Selector&nbsp;feature.</p>
+          </div>
+          <div class="docblock">
+            <p><span class="emblem available">since: 0.8.27</span></p>
           </div>
         </div>
       
@@ -1738,6 +1789,16 @@ given frame rate. A negative or zero <code>frame_rate</code> value disables the 
           </div>
           <div class="docblock">
             <p><span class="emblem available">since: 0.8.0</span></p>
+          </div>
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Camera.set_frame_rate_enable.html">arv_camera_set_frame_rate_enable</a></h6>
+          <div class="docblock">
+            No description available.
+          </div>
+          <div class="docblock">
+            <p></p>
           </div>
         </div>
       
