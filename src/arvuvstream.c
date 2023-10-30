@@ -578,11 +578,14 @@ arv_uv_stream_thread_sync (void *data)
 
 	printf("[ARAVIS][U3V][SYNC] Before loop\n");
 
-	bool loop_status = true;
+	gboolean loop_status = true;
 
 	while (loop_status) {
 
-		if (!g_atomic_int_get (&thread_data->cancel)){
+		gint num_atomic = g_atomic_int_get (&thread_data->cancel);
+		// printf("[ARAVIS][U3V][SYNC] num_atomic %d\n", num_atomic);
+
+		if (num_atomic == 0){
 			printf("[ARAVIS][U3V][SYNC] !g_atomic_int_get (&thread_data->cancel)\n");
 			loop_status = false;
 		}
