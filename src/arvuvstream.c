@@ -578,7 +578,7 @@ arv_uv_stream_thread_sync (void *data)
 
 	printf("[ARAVIS][U3V][SYNC] Before loop\n");
 
-	gboolean loop_status = true;
+	gboolean loop_status = TRUE;
 
 	while (loop_status) {
 
@@ -587,7 +587,7 @@ arv_uv_stream_thread_sync (void *data)
 
 		if (num_atomic == 0){
 			printf("[ARAVIS][U3V][SYNC] !g_atomic_int_get (&thread_data->cancel)\n");
-			loop_status = false;
+			loop_status = FALSE;
 		}
 
 		GError *error = NULL;
