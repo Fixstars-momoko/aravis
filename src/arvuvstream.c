@@ -510,6 +510,8 @@ arv_uv_stream_thread_async (void *data)
 
 	ctx_lookup = g_hash_table_new_full( g_direct_hash, g_direct_equal, NULL, arv_uv_stream_buffer_context_free );
 
+	printf("[ARAVIS][U3V][ASYNC] Before loop");
+
 	while (!g_atomic_int_get (&thread_data->cancel) &&
                arv_uv_device_is_connected (thread_data->uv_device)) {
 		ArvUvStreamBufferContext* ctx;
@@ -534,15 +536,23 @@ arv_uv_stream_thread_async (void *data)
 
                 arv_uv_stream_buffer_context_submit (ctx, buffer, thread_data);
 	}
+	printf("[ARAVIS][U3V][ASYNC] After loop");
 
 	g_hash_table_foreach (ctx_lookup, arv_uv_stream_buffer_context_cancel, NULL);
+	printf("[ARAVIS][U3V][ASYNC] After g_hash_table_foreach");
 
 	g_hash_table_destroy (ctx_lookup);
+	printf("[ARAVIS][U3V][ASYNC] After g_hash_table_destroy");
 
-	if (thread_data->callback != NULL)
+	if (thread_data->callback != NULL){
+		printf("[ARAVIS][U3V][ASYNC] thread_data->callback != NULL");
 		thread_data->callback (thread_data->callback_data, ARV_STREAM_CALLBACK_TYPE_EXIT, NULL);
+		printf("[ARAVIS][U3V][ASYNC] Exit thread_data->callback");
+	}
+		
 
 	arv_debug_stream_thread ("Stop USB3Vision stream thread");
+	printf("[ARAVIS][U3V][ASYNC] After Stop USB3Vision stream thread");
 
 	return NULL;
 }
@@ -565,6 +575,8 @@ arv_uv_stream_thread_sync (void *data)
 		thread_data->callback (thread_data->callback_data, ARV_STREAM_CALLBACK_TYPE_INIT, NULL);
 
 	offset = 0;
+
+	printf("[ARAVIS][U3V][SYNC] Before loop");
 
 	while (!g_atomic_int_get (&thread_data->cancel)) {
 		GError *error = NULL;
@@ -757,22 +769,34 @@ arv_uv_stream_thread_sync (void *data)
         }
     } //end of while loop
 
+	printf("[ARAVIS][U3V][SYNC] After loop");
+
     if (buffer != NULL) {
+		printf("[ARAVIS][U3V][SYNC] buffer is not NULL");
 		buffer->priv->status = ARV_BUFFER_STATUS_ABORTED;
                 thread_data->statistics.n_aborted++;
+		printf("[ARAVIS][U3V][SYNC] Before arv_stream_push_output_buffer");
 		arv_stream_push_output_buffer (thread_data->stream, buffer);
-		if (thread_data->callback != NULL)
+		if (thread_data->callback != NULL){
+			printf("[ARAVIS][U3V][SYNC] thread_data->callback is not NULL");
 			thread_data->callback (thread_data->callback_data,
 					       ARV_STREAM_CALLBACK_TYPE_BUFFER_DONE,
 					       buffer);
+		}
+
 	}
 
-	if (thread_data->callback != NULL)
+	if (thread_data->callback != NULL){
+		printf("[ARAVIS][U3V][SYNC] thread_data->callback != NULL");
 		thread_data->callback (thread_data->callback_data, ARV_STREAM_CALLBACK_TYPE_EXIT, NULL);
+	}
+		
 
 	g_free (incoming_buffer);
+	printf("[ARAVIS][U3V][SYNC] After g_free");
 
 	arv_debug_stream_thread ("Stop USB3Vision stream thread");
+	printf("[ARAVIS][U3V][SYNC] After arv_debug_stream_thread");
 
 	return NULL;
 }
