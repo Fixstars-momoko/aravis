@@ -759,7 +759,7 @@ arv_uv_stream_thread_sync (void *data)
                                         break;
             }
         }
-		gint num_atomic_ = gint num_atomic = g_atomic_int_get (&thread_data->cancel);
+		gint num_atomic_ = g_atomic_int_get (&thread_data->cancel);
 		printf("[ARAVIS][U3V][SYNC] num_atomic = %i\n", num_atomic_);
     } //end of while loop
 
