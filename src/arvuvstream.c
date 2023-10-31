@@ -510,8 +510,6 @@ arv_uv_stream_thread_async (void *data)
 
 	ctx_lookup = g_hash_table_new_full( g_direct_hash, g_direct_equal, NULL, arv_uv_stream_buffer_context_free );
 
-	printf("[ARAVIS][U3V][ASYNC] Before loop\n");
-
 	while (!g_atomic_int_get (&thread_data->cancel) &&
                arv_uv_device_is_connected (thread_data->uv_device)) {
 		ArvUvStreamBufferContext* ctx;
@@ -536,23 +534,15 @@ arv_uv_stream_thread_async (void *data)
 
                 arv_uv_stream_buffer_context_submit (ctx, buffer, thread_data);
 	}
-	printf("[ARAVIS][U3V][ASYNC] After loop\n");
 
 	g_hash_table_foreach (ctx_lookup, arv_uv_stream_buffer_context_cancel, NULL);
-	printf("[ARAVIS][U3V][ASYNC] After g_hash_table_foreach\n");
 
 	g_hash_table_destroy (ctx_lookup);
-	printf("[ARAVIS][U3V][ASYNC] After g_hash_table_destroy\n");
 
-	if (thread_data->callback != NULL){
-		printf("[ARAVIS][U3V][ASYNC] thread_data->callback != NULL\n");
+	if (thread_data->callback != NULL)
 		thread_data->callback (thread_data->callback_data, ARV_STREAM_CALLBACK_TYPE_EXIT, NULL);
-		printf("[ARAVIS][U3V][ASYNC] Exit thread_data->callback\n");
-	}
 		
-
 	arv_debug_stream_thread ("Stop USB3Vision stream thread");
-	printf("[ARAVIS][U3V][ASYNC] After Stop USB3Vision stream thread\n");
 
 	return NULL;
 }
@@ -578,17 +568,7 @@ arv_uv_stream_thread_sync (void *data)
 
 	printf("[ARAVIS][U3V][SYNC] Before loop\n");
 
-	gboolean loop_status = TRUE;
-
-	while (loop_status) {
-
-		gint num_atomic = g_atomic_int_get (&thread_data->cancel);
-		// printf("[ARAVIS][U3V][SYNC] num_atomic %d\n", num_atomic);
-
-		if (num_atomic == 0){
-			printf("[ARAVIS][U3V][SYNC] !g_atomic_int_get (&thread_data->cancel)\n");
-			loop_status = FALSE;
-		}
+	while (!g_atomic_int_get (&thread_data->cancel)) {
 
 		GError *error = NULL;
 		size_t size;
@@ -774,11 +754,13 @@ arv_uv_stream_thread_sync (void *data)
                     }
                     break;
                                 default:
-									printf("[ARAVIS][U3V][SYNC] default in switch\n");
+										printf("[ARAVIS][U3V][SYNC] default in switch\n");
                                         arv_info_stream_thread ("Unknown packet type");
                                         break;
             }
         }
+		gint num_atomic_ = gint num_atomic = g_atomic_int_get (&thread_data->cancel);
+		printf("[ARAVIS][U3V][SYNC] num_atomic = %i\n", num_atomic_);
     } //end of while loop
 
 	printf("[ARAVIS][U3V][SYNC] After loop\n");
