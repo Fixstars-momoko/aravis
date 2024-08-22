@@ -119,7 +119,7 @@ jobs:
 
   windows:
     name: Build wheel on windows
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
       - name: Disable perl
         run: |
