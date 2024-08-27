@@ -75,7 +75,7 @@ jobs:
         cd vcpkg
         git checkout 2024.07.12
         .\bootstrap-vcpkg.bat  && cd ../
-        
+
     - name: Install dependencies
       if: steps.cache_status.outputs.cache-hit != 'true'
       shell: cmd
@@ -98,25 +98,12 @@ jobs:
         set PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\tools\gobject-introspection;%PATH%
         set PATH=${{env.NINJA_INSTALL}};%PATH%
         set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig\;%PKG_CONFIG_PATH%
-        meson setup --pkg-config-path ${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig -Ddocumentation=disabled -Dgst-plugin=disabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}\install -Dintrospection=disabled build .
-        meson compile -C ./build
-        meson install -C ./build
-
-    - name: Build Aravis (gst-plugin)
-      if: matrix.os == 'default'
-      shell: cmd
-      run: |
-        set PATH=${{env.PKG_CONFIG_INSTALL}}\pkg-config-lite-${{env.PKG_CONFIG_VERSION}}\bin;%PATH%
-        set PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\bin;%PATH%
-        set PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\tools\gobject-introspection;%PATH%
-        set PATH=${{env.NINJA_INSTALL}};%PATH%
-        set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig\;%PKG_CONFIG_PATH%
         meson setup --pkg-config-path ${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig -Ddocumentation=disabled -Dgst-plugin=enabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}\install -Dintrospection=disabled build .
         meson compile -C ./build
         meson install -C ./build
 
     - name: Build Aravis (python)
-      if: matrix.os == 'default'
+      if: matrix.os == 'python'
       shell: cmd
       run: |
         set PATH=${{env.PKG_CONFIG_INSTALL}}\pkg-config-lite-${{env.PKG_CONFIG_VERSION}}\bin;%PATH%
