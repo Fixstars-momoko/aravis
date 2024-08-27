@@ -14,11 +14,45 @@ env:
   NINJA_INSTALL: C:\ninja
 
 jobs:
+  release-pygobject-dependency:
+    runs-on: windows-2022
+    steps:
+      - name: Check for existing pygobject cache
+        id: pyg_cache_status
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}\pygobject\vcpkg_installed
+          key: ${{ runner.os }}-vcpkg-pygobject
+
+      - name: Install pygobject dependency for python package
+        if: steps.pyg_cache_status.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          vcpkg install gobject-introspection --x-install-root ${{ github.workspace }}\pygobject\vcpkg_installed 
+      - name: Cache pygobject dependency
+        if: steps.pyg_cache_status.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}\pygobject\vcpkg_installed
+          key: ${{ runner.os }}-vcpkg-pygobject
+
+      - name: Zip pygobject dependency directory
+        shell: powershell
+        run: |
+          $env:tag="${{env.ARAVIS_VER}}"
+          $env:tag=$env:tag.TrimStart("v")
+          Compress-Archive -Path ${{ github.workspace }}\pygobject\vcpkg_installed\x64-windows\bin, ${{ github.workspace }}\pygobject\vcpkg_installed\x64-windows\lib, ${{ github.workspace }}\pygobject\vcpkg_installed\x64-windows\include -Destination "pygobject-dependencies.zip"
+      
+      - name: Release pgobject dependency
+        uses: softprops/action-gh-release@v1
+        with:
+          files: pygobject-dependencies.zip
+  
   vcpkg:
     runs-on: windows-2022
     strategy:
       matrix:
-        package: [default, python, pygobject]
+        package: [default, python]
     steps:
     - name: Disable perl
       run: |
