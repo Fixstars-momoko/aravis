@@ -18,7 +18,7 @@ jobs:
     runs-on: windows-2022
     strategy:
       matrix:
-        os: [default, gst-plugin, python]
+        os: [default, python]
     steps:
     - name: Disable perl
       run: |
