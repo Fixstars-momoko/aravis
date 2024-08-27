@@ -81,7 +81,7 @@ jobs:
     runs-on: windows-2022
     strategy:
       matrix:
-        package: [default, python]   
+        package: [default, pygobject]
     steps:
       - name: Disable perl
         run: |
@@ -176,7 +176,7 @@ jobs:
           Copy-Item -Recurse -Path ${{ github.workspace }}\vcpkg_installed\x64-windows\lib -Destination ${{ github.workspace }}\aravis_dependencies\lib
           Compress-Archive -Path ${{ github.workspace }}\aravis_dependencies -Destination "aravis-${env:tag}-dependencies.zip"
 
-      - name: Zip directory (PyGObject dependenvies)
+      - name: Zip directory (PyGObject dependencies)
         if: matrix.package == 'pygobject'
         shell: powershell
         run: |
@@ -190,4 +190,6 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: aravis*.zip
+          files: |
+            aravis*.zip 
+            PyGObject*.zip 
