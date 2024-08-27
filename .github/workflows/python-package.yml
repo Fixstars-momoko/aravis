@@ -181,6 +181,7 @@ jobs:
         if: steps.cache_status.outputs.cache-hit != 'true'
         shell: cmd
         run: |
+          cd vcpkg_manifest\python
           ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
       - name: Cache dependencies
         if: steps.cache_status.outputs.cache-hit != 'true'

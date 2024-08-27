@@ -18,7 +18,7 @@ jobs:
     runs-on: windows-2022
     strategy:
       matrix:
-        os: [default, python]
+        package: [default, python, pygobject]
     steps:
     - name: Disable perl
       run: |
@@ -80,7 +80,7 @@ jobs:
       if: steps.cache_status.outputs.cache-hit != 'true'
       shell: cmd
       run: |
-        cd vcpkg_manifest\${{ matrix.os }}
+        cd vcpkg_manifest\${{ matrix.package }}
         ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
     - name: Cache dependencies
       if: steps.cache_status.outputs.cache-hit != 'true'
@@ -90,7 +90,7 @@ jobs:
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
 
     - name: Build Aravis (default)
-      if: matrix.os == 'default'
+      if: matrix.package == 'default'
       shell: cmd
       run: |
         set PATH=${{env.PKG_CONFIG_INSTALL}}\pkg-config-lite-${{env.PKG_CONFIG_VERSION}}\bin;%PATH%
@@ -103,7 +103,7 @@ jobs:
         meson install -C ./build
 
     - name: Build Aravis (python)
-      if: matrix.os == 'python'
+      if: matrix.package == 'python'
       shell: cmd
       run: |
         set PATH=${{env.PKG_CONFIG_INSTALL}}\pkg-config-lite-${{env.PKG_CONFIG_VERSION}}\bin;%PATH%
@@ -116,6 +116,7 @@ jobs:
         meson install -C ./build
 
     - name: test
+      if: matrix.package == 'default'
       run: |
         meson test -C .\build
     - name: logs

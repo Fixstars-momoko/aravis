@@ -10,6 +10,7 @@ env:
   PKG_CONFIG_INSTALL: C:\pkg-config
   PKG_CONFIG_VERSION: 0.28-1
   NINJA_INSTALL: C:\ninja
+  PYGOBJECT_VERSION: 1.72.0
 
 jobs:
   release-linux:
@@ -78,6 +79,9 @@ jobs:
               aravis*-arm-64-macos.tar.gz
   release-windows:
     runs-on: windows-2022
+    strategy:
+      matrix:
+        package: [default, python]   
     steps:
       - name: Disable perl
         run: |
@@ -138,6 +142,7 @@ jobs:
         if: steps.cache_status.outputs.cache-hit != 'true'
         shell: cmd
         run: |
+          cd vcpkg_manifest\${{ matrix.package }}
           ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
       - name: Cache dependencies
         if: steps.cache_status.outputs.cache-hit != 'true'
@@ -147,6 +152,7 @@ jobs:
           key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
 
       - name: Build Aravis
+        if: matrix.package == 'default'
         shell: cmd
         run: |
           set PATH=${{env.PKG_CONFIG_INSTALL}}\pkg-config-lite-${{env.PKG_CONFIG_VERSION}}\bin;%PATH%
@@ -158,7 +164,8 @@ jobs:
           meson compile -C ./build
           meson install -C ./build
 
-      - name: Zip directory
+      - name: Zip directory (Aravis)
+        if: matrix.package == 'default'
         shell: powershell
         run: |
           $env:tag="${{env.ARAVIS_VER}}"
@@ -168,7 +175,18 @@ jobs:
           Copy-Item -Recurse -Path ${{ github.workspace }}\vcpkg_installed\x64-windows\include -Destination ${{ github.workspace }}\aravis_dependencies\include
           Copy-Item -Recurse -Path ${{ github.workspace }}\vcpkg_installed\x64-windows\lib -Destination ${{ github.workspace }}\aravis_dependencies\lib
           Compress-Archive -Path ${{ github.workspace }}\aravis_dependencies -Destination "aravis-${env:tag}-dependencies.zip"
-     
+
+      - name: Zip directory (PyGObject dependenvies)
+        if: matrix.package == 'pygobject'
+        shell: powershell
+        run: |
+          $env:tag="${{env.ARAVIS_VER}}"
+          $env:tag=$env:tag.TrimStart("v")
+          Copy-Item -Recurse -Path ${{ github.workspace }}\vcpkg_installed\x64-windows\bin -Destination ${{ github.workspace }}\pygobject_dependencies\bin
+          Copy-Item -Recurse -Path ${{ github.workspace }}\vcpkg_installed\x64-windows\include -Destination ${{ github.workspace }}\pygobject_dependencies\include
+          Copy-Item -Recurse -Path ${{ github.workspace }}\vcpkg_installed\x64-windows\lib -Destination ${{ github.workspace }}\pygobject_dependencies\lib
+          Compress-Archive -Path ${{ github.workspace }}\pygobject_dependencies -Destination "PyGObject-${{env.PYGOBJECT_VERSION}}-dependencies.zip"
+                 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
