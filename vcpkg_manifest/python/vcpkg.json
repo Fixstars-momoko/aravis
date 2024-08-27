@@ -6,12 +6,14 @@
 		{ "name": "glib", "version>=": "2.78.1"},
 		{ "name": "libxml2", "version>=": "2.11.6#1"},
 		{ "name": "libusb", "version>=": "1.0.26.11791#7"},
+		{ "name": "gstreamer", "version>=": "1.22.5#8"},
 		{ "name": "gobject-introspection", "version>=": "1.72.0#7"}
 	],
 	"overrides": [
 		{ "name": "glib", "version": "2.78.1"},
 		{ "name": "libxml2", "version": "2.11.6#1"},
 		{ "name": "libusb", "version": "1.0.26.11791#7"},
+		{ "name": "gstreamer", "version": "1.22.5#8"},
 		{ "name": "gobject-introspection", "version": "1.72.0#7"}
 	]
 }
