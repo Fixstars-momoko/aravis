@@ -1,0 +1,17 @@
+{
+	"name": "aravis",
+	"version-semver": "0.8.30",
+	"builtin-baseline":"2c401863dd54a640aeb26ed736c55489c079323b",
+	"dependencies": [
+		{ "name": "glib", "version>=": "2.78.1"},
+		{ "name": "libxml2", "version>=": "2.11.6#1"},
+		{ "name": "libusb", "version>=": "1.0.26.11791#7"}
+		{ "name": "gobject-introspection", "version>=": "1.72.0#7"}
+	],
+	"overrides": [
+		{ "name": "glib", "version": "2.78.1"},
+		{ "name": "libxml2", "version": "2.11.6#1"},
+		{ "name": "libusb", "version": "1.0.26.11791#7"},
+		{ "name": "gobject-introspection", "version": "1.72.0#7"}
+	]
+}
