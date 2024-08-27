@@ -77,7 +77,7 @@ jobs:
       if: steps.cache_status.outputs.cache-hit != 'true'
       shell: cmd
       run: |
-        cd vcpkg\${{ matrix.os }}
+        cd vcpkg_manifest\${{ matrix.os }}
         ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
     - name: Cache dependencies
       if: steps.cache_status.outputs.cache-hit != 'true'
