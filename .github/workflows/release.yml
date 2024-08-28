@@ -129,7 +129,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}\vcpkg_installed
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+          key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
       - name: Install vcpkg
         if: steps.cache_status.outputs.cache-hit != 'true'
         shell: cmd
@@ -149,7 +149,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}\vcpkg_installed
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+          key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
 
       - name: Build Aravis
         if: matrix.package == 'default'
