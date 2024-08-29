@@ -174,11 +174,14 @@ jobs:
         shell: cmd
         run: |
           git clone https://github.com/microsoft/vcpkg.git
-          cd vcpkg && .\bootstrap-vcpkg.bat  && cd ../
+          cd vcpkg
+          git checkout 2024.07.12
+          .\bootstrap-vcpkg.bat  && cd ../
       - name: Install dependencies
         if: steps.cache_status.outputs.cache-hit != 'true'
         shell: cmd
         run: |
+          cd vcpkg_manifest\python
           ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
       - name: Cache dependencies
         if: steps.cache_status.outputs.cache-hit != 'true'

@@ -1,0 +1,11 @@
+{
+	"name": "aravis",
+	"version-semver": "0.8.31",
+	"builtin-baseline":"2c401863dd54a640aeb26ed736c55489c079323b",
+	"dependencies": [
+		{ "name": "gobject-introspection", "version>=": "1.72.0#7"}
+	],
+	"overrides": [
+		{ "name": "gobject-introspection", "version": "1.72.0#7"}
+	]
+}
