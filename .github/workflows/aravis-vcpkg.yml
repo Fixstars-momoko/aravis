@@ -12,6 +12,8 @@ env:
   PKG_CONFIG_INSTALL: C:\pkg-config
   PKG_CONFIG_VERSION: 0.28-1
   NINJA_INSTALL: C:\ninja
+  PKGCONFIG_URL: https://sourceforge.net/projects/pkgconfiglite/files/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip/download
+  VCPKG_VERSION: 2024.09.30
 
 jobs:
   vcpkg:
@@ -23,18 +25,11 @@ jobs:
     - name: Disable perl
       run: |
         rm -r C:\Strawberry\perl
-    - name: Setup Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
 
-    - name: Setup winget for pkg-config-lite
-      uses: Cyberboss/install-winget@v1
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Setup pkg-config-lite
-      run: winget install bloodrock.pkg-config-lite --accept-source-agreements --accept-package-agreements --location ${{env.PKG_CONFIG_INSTALL}} --version ${{env.PKG_CONFIG_VERSION}}
+    - name: Setup pkg-config-lite to build gst-plugin
+      run: |
+        Invoke-WebRequest -UserAgent "Wget" -Uri ${{env.PKGCONFIG_URL}} -OutFile pkg-config-lite-0.28-1_bin-win32.zip
+        Expand-Archive -Path pkg-config-lite-0.28-1_bin-win32.zip -DestinationPath ${{env.PKG_CONFIG_INSTALL}}
 
     - name: Confirm pkg-config
       id: pkg-config-existence
