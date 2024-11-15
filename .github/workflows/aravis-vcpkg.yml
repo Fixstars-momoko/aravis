@@ -22,6 +22,10 @@ jobs:
       matrix:
         package: [default, python, pygobject]
     steps:
+
+    - name: Checkout Aravis
+      uses: actions/checkout@v4.1.1
+
     - name: Disable perl
       run: |
         rm -r C:\Strawberry\perl
@@ -48,7 +52,7 @@ jobs:
       run: |
         cd vcpkg_manifest\${{ matrix.package }}
         ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
-        
+
     - name: Cache dependencies
       if: steps.cache_status.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
@@ -82,9 +86,6 @@ jobs:
 
     - name: Set up MSVC command env
       uses: ilammy/msvc-dev-cmd@v1
-
-    - name: Checkout Aravis
-      uses: actions/checkout@v2
 
     - name: Build Aravis (default)
       if: matrix.package == 'default'

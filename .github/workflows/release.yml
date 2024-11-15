@@ -85,6 +85,10 @@ jobs:
       matrix:
         package: [default, pygobject]
     steps:
+
+      - name: Checkout Aravis
+        uses: actions/checkout@v4.1.1
+
       - name: Disable perl
         run: |
           rm -r C:\Strawberry\perl
@@ -145,9 +149,6 @@ jobs:
 
       - name: Set up MSVC command env
         uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Checkout Aravis
-        uses: actions/checkout@v2
 
       - name: Build Aravis
         if: matrix.package == 'default'
