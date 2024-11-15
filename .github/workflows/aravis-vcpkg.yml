@@ -26,6 +26,36 @@ jobs:
       run: |
         rm -r C:\Strawberry\perl
 
+    - name: Check for existing cache
+      id: cache_status
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}\vcpkg_installed
+        key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
+
+    - name: Install vcpkg
+      if: steps.cache_status.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        cd vcpkg
+        git checkout ${{env.VCPKG_VERSION}}
+        .\bootstrap-vcpkg.bat  && cd ../
+
+    - name: Install dependencies
+      if: steps.cache_status.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cd vcpkg_manifest\${{ matrix.package }}
+        ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
+        
+    - name: Cache dependencies
+      if: steps.cache_status.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ github.workspace }}\vcpkg_installed
+        key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
+
     - name: Setup pkg-config-lite to build gst-plugin
       run: |
         Invoke-WebRequest -UserAgent "Wget" -Uri ${{env.PKGCONFIG_URL}} -OutFile pkg-config-lite-0.28-1_bin-win32.zip
@@ -55,34 +85,6 @@ jobs:
 
     - name: Checkout Aravis
       uses: actions/checkout@v2
-
-    - name: Check for existing cache
-      id: cache_status
-      uses: actions/cache@v4
-      with:
-        path: ${{ github.workspace }}\vcpkg_installed
-        key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
-    - name: Install vcpkg
-      if: steps.cache_status.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        git clone https://github.com/microsoft/vcpkg.git
-        cd vcpkg
-        git checkout 2024.07.12
-        .\bootstrap-vcpkg.bat  && cd ../
-
-    - name: Install dependencies
-      if: steps.cache_status.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        cd vcpkg_manifest\${{ matrix.package }}
-        ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
-    - name: Cache dependencies
-      if: steps.cache_status.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
-      with:
-        path: ${{ github.workspace }}\vcpkg_installed
-        key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
 
     - name: Build Aravis (default)
       if: matrix.package == 'default'
