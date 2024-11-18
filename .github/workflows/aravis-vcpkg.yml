@@ -13,7 +13,7 @@ env:
   PKG_CONFIG_VERSION: 0.28-1
   NINJA_INSTALL: C:\ninja
   PKGCONFIG_URL: https://sourceforge.net/projects/pkgconfiglite/files/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip/download
-  VCPKG_VERSION: 2024.09.30
+  VCPKG_VERSION: 2024.07.12
 
 jobs:
   vcpkg:
