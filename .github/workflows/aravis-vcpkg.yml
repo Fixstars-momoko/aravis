@@ -13,7 +13,7 @@ env:
   PKG_CONFIG_VERSION: 0.28-1
   NINJA_INSTALL: C:\ninja
   PKGCONFIG_URL: https://sourceforge.net/projects/pkgconfiglite/files/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip/download
-  VCPKG_VERSION: 2024.07.12
+  VCPKG_VERSION: 2024.09.30
 
 jobs:
   vcpkg:
@@ -29,6 +29,11 @@ jobs:
     - name: Disable perl
       run: |
         rm -r C:\Strawberry\perl
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
 
     - name: Check for existing cache
       id: cache_status
