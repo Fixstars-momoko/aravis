@@ -11,6 +11,8 @@ env:
   PKG_CONFIG_VERSION: 0.28-1
   NINJA_INSTALL: C:\ninja
   PYGOBJECT_VERSION: 1.72.0
+  PKGCONFIG_URL: https://sourceforge.net/projects/pkgconfiglite/files/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip/download
+  VCPKG_VERSION: 2024.09.30
 
 jobs:
   release-linux:
@@ -83,22 +85,49 @@ jobs:
       matrix:
         package: [default, pygobject]
     steps:
+
+      - name: Checkout Aravis
+        uses: actions/checkout@v4.1.1
+
       - name: Disable perl
         run: |
           rm -r C:\Strawberry\perl
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v4
+
+      - name: Check for existing cache
+        id: cache_status
+        uses: actions/cache@v4
         with:
-          python-version: "3.11"
+          path: ${{ github.workspace }}\vcpkg_installed
+          key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
 
-      - name: Setup winget for pkg-config-lite
-        uses: Cyberboss/install-winget@v1
+      - name: Install vcpkg
+        if: steps.cache_status.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          git checkout ${{env.VCPKG_VERSION}}
+          .\bootstrap-vcpkg.bat  && cd ../
+
+      - name: Install dependencies
+        if: steps.cache_status.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          cd vcpkg_manifest\${{ matrix.package }}
+          ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
+
+      - name: Cache dependencies
+        if: steps.cache_status.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ github.workspace }}\vcpkg_installed
+          key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
 
-      - name: Setup pkg-config-lite
-        run: winget install bloodrock.pkg-config-lite --accept-source-agreements --accept-package-agreements --location ${{env.PKG_CONFIG_INSTALL}} --version ${{env.PKG_CONFIG_VERSION}}
-
+      - name: Setup pkg-config-lite to build gst-plugin
+        run: |
+          Invoke-WebRequest -UserAgent "Wget" -Uri ${{env.PKGCONFIG_URL}} -OutFile pkg-config-lite-0.28-1_bin-win32.zip
+          Expand-Archive -Path pkg-config-lite-0.28-1_bin-win32.zip -DestinationPath ${{env.PKG_CONFIG_INSTALL}}
+    
       - name: Confirm pkg-config
         id: pkg-config-existence
         uses: andstor/file-existence-action@v3
@@ -120,36 +149,6 @@ jobs:
 
       - name: Set up MSVC command env
         uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Checkout Aravis
-        uses: actions/checkout@v2
-
-      - name: Check for existing cache
-        id: cache_status
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}\vcpkg_installed
-          key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
-      - name: Install vcpkg
-        if: steps.cache_status.outputs.cache-hit != 'true'
-        shell: cmd
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          cd vcpkg
-          git checkout 2024.07.12
-          .\bootstrap-vcpkg.bat  && cd ../
-      - name: Install dependencies
-        if: steps.cache_status.outputs.cache-hit != 'true'
-        shell: cmd
-        run: |
-          cd vcpkg_manifest\${{ matrix.package }}
-          ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
-      - name: Cache dependencies
-        if: steps.cache_status.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ github.workspace }}\vcpkg_installed
-          key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
 
       - name: Build Aravis
         if: matrix.package == 'default'
