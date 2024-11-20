@@ -10,6 +10,8 @@ env:
   PKG_CONFIG_INSTALL: C:\pkg-config
   PKG_CONFIG_VERSION: 0.28-1
   NINJA_INSTALL: C:\ninja
+  PKGCONFIG_URL: https://sourceforge.net/projects/pkgconfiglite/files/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip/download
+  VCPKG_VERSION: 2024.09.30
 
 jobs:
   linux:
@@ -32,7 +34,7 @@ jobs:
       - name: Build
         run: |
           mkdir build
-          meson setup -Ddocumentation=disabled -Dgst-plugin=enabled -Dusb=enabled -Dviewer=enabled -Dintrospection=enabled  -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}/install build . 
+          meson setup --buildtype=release -Ddocumentation=disabled -Dgst-plugin=enabled -Dusb=enabled -Dviewer=enabled -Dintrospection=enabled  -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}/install build . 
           meson compile -C ./build
           meson install -C ./build
         env:
@@ -41,6 +43,7 @@ jobs:
       - name: install dependency
         run: |
           sudo apt-get update && sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config
+          
       
       - name: Copy linux file
         run: |
@@ -86,7 +89,7 @@ jobs:
       - name: Build
         run: |
           mkdir build
-          meson setup -Ddocumentation=disabled -Dgst-plugin=enabled -Dusb=enabled -Dviewer=enabled -Dintrospection=enabled  -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}/install build . 
+          meson setup --buildtype=release -Ddocumentation=disabled -Dgst-plugin=enabled -Dusb=enabled -Dviewer=enabled -Dintrospection=enabled  -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}/install build . 
           meson compile -C ./build
           meson install -C ./build
       - name: Copy macos file
@@ -134,8 +137,10 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup pkg-config-lite
-        run: winget install bloodrock.pkg-config-lite --accept-source-agreements --accept-package-agreements --location ${{env.PKG_CONFIG_INSTALL}} --version ${{env.PKG_CONFIG_VERSION}}
+      - name: Setup pkg-config-lite to build gst-plugin
+        run: |
+         Invoke-WebRequest -UserAgent "Wget" -Uri ${{env.PKGCONFIG_URL}} -OutFile pkg-config-lite-0.28-1_bin-win32.zip
+         Expand-Archive -Path pkg-config-lite-0.28-1_bin-win32.zip -DestinationPath ${{env.PKG_CONFIG_INSTALL}}
 
       - name: Confirm pkg-config
         id: pkg-config-existence
@@ -175,13 +180,13 @@ jobs:
         run: |
           git clone https://github.com/microsoft/vcpkg.git
           cd vcpkg
-          git checkout 2024.07.12
+          git checkout ${{env.VCPKG_VERSION}}
           .\bootstrap-vcpkg.bat  && cd ../
       - name: Install dependencies
         if: steps.cache_status.outputs.cache-hit != 'true'
         shell: cmd
         run: |
-          cd vcpkg_manifest\python
+          cd vcpkg_manifest\${{ matrix.package }}
           ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
       - name: Cache dependencies
         if: steps.cache_status.outputs.cache-hit != 'true'
@@ -198,7 +203,7 @@ jobs:
           set PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\tools\gobject-introspection;%PATH%
           set PATH=${{env.NINJA_INSTALL}};%PATH%
           set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig\;%PKG_CONFIG_PATH%
-          meson setup --pkg-config-path ${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig -Ddocumentation=disabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}\install -Dintrospection=enabled build .
+          meson setup --buildtype release --pkg-config-path ${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig -Ddocumentation=disabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}\install -Dintrospection=enabled build .
           meson compile -C ./build
           meson install -C ./build
       - name: Copy windows file
