@@ -106,7 +106,7 @@ jobs:
         meson install -C ./build
 
     - name: test
-      if: matrix.package == 'default'
+      if: matrix.package == 'python'
       run: |
         meson test -C .\build
     - name: logs
