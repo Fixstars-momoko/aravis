@@ -116,7 +116,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Build Aravis
-        if: matrix.package == 'default'
+        if: matrix.package == 'python'
         shell: cmd
         run: |
             set PATH=${{env.PKG_CONFIG_INSTALL}}\pkg-config-lite-${{env.PKG_CONFIG_VERSION}}\bin;%PATH%
