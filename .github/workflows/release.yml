@@ -1,0 +1,147 @@
+name: Release-0.8.30-internal
+
+on:
+  push:
+    # Pattern matched against refs/tags
+    tags:        
+      - 'v*'
+env:
+  ARAVIS_VER: ${{github.ref_name}}
+  PKG_CONFIG_INSTALL: C:\pkg-config
+  PKG_CONFIG_VERSION: 0.28-1
+  NINJA_INSTALL: C:\ninja
+  PKGCONFIG_URL: https://sourceforge.net/projects/pkgconfiglite/files/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip/download
+  VCPKG_VERSION: 2024.09.30
+
+jobs:
+  release-linux:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: |
+        pip3 install meson ninja Markdown toml typogrify
+        sudo apt update
+        sudo apt install python3 libusb-1.0-0-dev gobject-introspection valgrind libgstreamer-plugins-bad1.0-dev libgtk-3-dev libgirepository1.0-dev python3-gi libunwind-dev gettext
+    - name: Build
+      run: |
+        mkdir build
+        meson setup --buildtype release -Ddocumentation=disabled -Dgst-plugin=enabled -Dusb=enabled -Dviewer=enabled -Dintrospection=disabled  -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}/install build . 
+        meson compile -C ./build
+        meson install -C ./build
+        export tag=${{env.ARAVIS_VER}}
+        cd install && tar -zcvf ../aravis-${tag:1}-x86-64-linux.tar.gz .
+      env:
+        CC: gcc
+    - name: Tests
+      run: meson test -C build/ -v
+    - name: Valgrind
+      run: meson test -C build/ -v --setup=valgrind
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+            aravis*-x86-64-linux.tar.gz
+  
+  release-windows:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        package: [python]
+    steps:
+
+      - name: Checkout Aravis
+        uses: actions/checkout@v4.1.1
+
+      - name: Disable perl
+        run: |
+          rm -r C:\Strawberry\perl
+
+      - name: Check for existing cache
+        id: cache_status
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}\vcpkg_installed
+          key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
+
+      - name: Install vcpkg
+        if: steps.cache_status.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          git checkout ${{env.VCPKG_VERSION}}
+          .\bootstrap-vcpkg.bat  && cd ../
+
+      - name: Install dependencies
+        if: steps.cache_status.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          cd vcpkg_manifest\${{ matrix.package }}
+          ${{ github.workspace }}\vcpkg\vcpkg.exe install --x-install-root ${{ github.workspace }}\vcpkg_installed
+
+      - name: Cache dependencies
+        if: steps.cache_status.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}\vcpkg_installed
+          key: ${{ runner.os }}-vcpkg-${{ matrix.package }}-${{ hashFiles('**/vcpkg.json') }}
+
+      - name: Setup pkg-config-lite to build gst-plugin
+        run: |
+          Invoke-WebRequest -UserAgent "Wget" -Uri ${{env.PKGCONFIG_URL}} -OutFile pkg-config-lite-0.28-1_bin-win32.zip
+          Expand-Archive -Path pkg-config-lite-0.28-1_bin-win32.zip -DestinationPath ${{env.PKG_CONFIG_INSTALL}}
+    
+      - name: Confirm pkg-config
+        id: pkg-config-existence
+        uses: andstor/file-existence-action@v3
+        with:
+          files: ${{env.PKG_CONFIG_INSTALL}}\pkg-config-lite-${{env.PKG_CONFIG_VERSION}}\bin\pkg-config.exe
+          fail: true
+
+      - name: Setup Meson
+        run: |
+          pip install meson
+      - name: Setup Ninja
+        uses: ahmedyarub/setup-ninja@master
+        with:
+          version: 1.11.1
+          dest: ${{env.NINJA_INSTALL}}
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Set up MSVC command env
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build Aravis
+        if: matrix.package == 'default'
+        shell: cmd
+        run: |
+            set PATH=${{env.PKG_CONFIG_INSTALL}}\pkg-config-lite-${{env.PKG_CONFIG_VERSION}}\bin;%PATH%
+            set PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\bin;%PATH%
+            set PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\tools\gobject-introspection;%PATH%
+            set PATH=${{env.NINJA_INSTALL}};%PATH%
+            set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig\;%PKG_CONFIG_PATH%
+            meson setup --buildtype release --pkg-config-path ${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig -Ddocumentation=disabled -Dgst-plugin=enabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}\install -Dintrospection=enabled build .
+            meson compile -C ./build
+            meson install -C ./build
+
+      - name: Zip directory (Aravis)
+        if: matrix.package == 'python'
+        shell: powershell
+        run: |
+          $env:tag="${{env.ARAVIS_VER}}"
+          $env:tag=$env:tag.TrimStart("v")
+          Compress-Archive -Path ${{ github.workspace }}\install\aravis -Destination "aravis-${env:tag}-x86-64-windows.zip"
+          Copy-Item -Recurse -Path ${{ github.workspace }}\vcpkg_installed\x64-windows\bin -Destination ${{ github.workspace }}\aravis_dependencies\bin
+          Copy-Item -Recurse -Path ${{ github.workspace }}\vcpkg_installed\x64-windows\include -Destination ${{ github.workspace }}\aravis_dependencies\include
+          Copy-Item -Recurse -Path ${{ github.workspace }}\vcpkg_installed\x64-windows\lib -Destination ${{ github.workspace }}\aravis_dependencies\lib
+          Compress-Archive -Path ${{ github.workspace }}\aravis_dependencies -Destination "aravis-${env:tag}-dependencies.zip"
+                 
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            aravis*.zip 
