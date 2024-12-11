@@ -37,14 +37,12 @@
 #include <arvgvspprivate.h>
 #include <time.h>
 #include <string.h>
-#include <stdint.h>
 
 /* TODO: Add l10n */
 #define _(x) (x)
 
 #define GST_ARAVIS_DEFAULT_N_BUFFERS		50
 #define GST_ARAVIS_BUFFER_TIMEOUT_DEFAULT	2000000
-#define GENDC_SIGNATURE 0x43444E47
 
 GST_DEBUG_CATEGORY_STATIC (aravis_debug);
 #define GST_CAT_DEFAULT aravis_debug
@@ -366,16 +364,10 @@ gst_aravis_set_caps (GstBaseSrc *src, GstCaps *caps)
 		gst_aravis->fixed_caps = caps;
 	} else
 		gst_aravis->fixed_caps = NULL;
-        GST_DEBUG_OBJECT (gst_aravis, "Width = %" G_GUINT64_FORMAT "",width);
-        GST_DEBUG_OBJECT (gst_aravis, "Height = %" G_GUINT64_FORMAT "",height);
 
 	if (!error) arv_device_set_features_from_string (arv_camera_get_device (gst_aravis->camera), gst_aravis->features, &error);
 
-	if (!error) {
-        gst_aravis->payload = arv_camera_get_payload (gst_aravis->camera, &error);
-        GST_DEBUG_OBJECT (gst_aravis, "Payload = %" G_GUINT64_FORMAT "", gst_aravis->payload);
-    }
-
+	if (!error) gst_aravis->payload = arv_camera_get_payload (gst_aravis->camera, &error);
 	if (!error) gst_aravis->stream = arv_camera_create_stream (gst_aravis->camera, NULL, NULL, &error);
 	if (error)
 		goto errored;
@@ -569,46 +561,30 @@ gst_aravis_create (GstPushSrc * push_src, GstBuffer ** buffer)
 		goto error;
 
 	buffer_data = (char *) arv_buffer_get_data (arv_buffer, &buffer_size);
-
-    if (gst_aravis->is_gendc!=1) {
-        int32_t signature;
-        memcpy(&signature, buffer_data, sizeof(int32_t));
-        if (signature == GENDC_SIGNATURE) {
-            gst_aravis->is_gendc = 1;
-            GST_LOG_OBJECT(gst_aravis, "GenDC Buffer");
-        }
-    }
-
-    if (gst_aravis->is_gendc!=-1){
-            *buffer = gst_buffer_new_wrapped_full (0, buffer_data, buffer_size, 0, buffer_size, NULL, NULL);
-    }else{
-            arv_buffer_get_image_region (arv_buffer, NULL, NULL, &width, &height);
-            arv_row_stride = width * ARV_PIXEL_FORMAT_BIT_PER_PIXEL (arv_buffer_get_image_pixel_format (arv_buffer)) / 8;
-
-            /* Gstreamer requires row stride to be a multiple of 4 */
-        if ((arv_row_stride & 0x3) != 0) {
-
-            int gst_row_stride;
-            size_t size;
-            char *data;
-            int i;
-
-            gst_row_stride = (arv_row_stride & ~(0x3)) + 4;
-
-            size = height * gst_row_stride;
-            data = g_malloc (size);
-
-            for (i = 0; i < height; i++)
-                memcpy (data + i * gst_row_stride, buffer_data + i * arv_row_stride, arv_row_stride);
-
-            *buffer = gst_buffer_new_wrapped (data, size);
-        } else {
-            // FIXME Should arv_stream_push_buffer when the GstBuffer is destroyed
-            *buffer = gst_buffer_new_wrapped_full (0, buffer_data, buffer_size, 0, buffer_size, NULL, NULL);
-        }
-    }
-
+	arv_buffer_get_image_region (arv_buffer, NULL, NULL, &width, &height);
+	arv_row_stride = width * ARV_PIXEL_FORMAT_BIT_PER_PIXEL (arv_buffer_get_image_pixel_format (arv_buffer)) / 8;
 	timestamp_ns = arv_buffer_get_timestamp (arv_buffer);
+
+	/* Gstreamer requires row stride to be a multiple of 4 */
+	if ((arv_row_stride & 0x3) != 0) {
+		int gst_row_stride;
+		size_t size;
+		char *data;
+		int i;
+
+		gst_row_stride = (arv_row_stride & ~(0x3)) + 4;
+
+		size = height * gst_row_stride;
+		data = g_malloc (size);
+
+		for (i = 0; i < height; i++)
+			memcpy (data + i * gst_row_stride, buffer_data + i * arv_row_stride, arv_row_stride);
+
+		*buffer = gst_buffer_new_wrapped (data, size);
+	} else {
+		// FIXME Should arv_stream_push_buffer when the GstBuffer is destroyed
+		*buffer = gst_buffer_new_wrapped_full (0, buffer_data, buffer_size, 0, buffer_size, NULL, NULL);
+	}
 
 	if (!base_src_does_timestamp) {
 		if (gst_aravis->timestamp_offset == 0) {
