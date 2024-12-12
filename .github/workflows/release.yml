@@ -58,6 +58,11 @@ jobs:
         run: |
           rm -r C:\Strawberry\perl
 
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
       - name: Check for existing cache
         id: cache_status
         uses: actions/cache@v4
