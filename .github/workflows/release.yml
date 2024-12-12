@@ -26,7 +26,7 @@ jobs:
     - name: Build
       run: |
         mkdir build
-        meson setup --buildtype release -Ddocumentation=disabled -Dgst-plugin=enabled -Dusb=enabled -Dviewer=enabled -Dintrospection=disabled  -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}/install build . 
+        meson setup --buildtype release -Ddocumentation=disabled -Dgst-plugin=enabled -Dusb=enabled -Dviewer=enabled -Dintrospection=enabled  -Dgv-n-buffers=1 -Dprefix=${{ github.workspace }}/install build . 
         meson compile -C ./build
         meson install -C ./build
         export tag=${{env.ARAVIS_VER}}
