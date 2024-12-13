@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ release/0.8.31 ]
+    branches: [ release/0.8.31, internal-develop-0.8.31 ]
   workflow_dispatch:
 
 env:
