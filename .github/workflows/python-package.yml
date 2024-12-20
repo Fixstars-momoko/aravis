@@ -237,7 +237,7 @@ jobs:
           set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\x64-windows\lib\pkgconfig\;%PKG_CONFIG_PATH%
           pip install PyGObject
           set ARAVIS_VER=${{env.ARAVIS_VER}}
-          set ARAVIS_VER=%ARAVIS_VER:v=%
+          set ARAVIS_VER=%ARAVIS_VER:~1%
           pip install ${{ github.workspace }}\aravis-python\wheelhouse\aravis_python-%ARAVIS_VER%-py3-none-win_amd64.whl
           python -c "import aravis"
       - uses: actions/upload-artifact@v4
