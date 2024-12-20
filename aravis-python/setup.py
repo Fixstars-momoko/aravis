@@ -27,7 +27,8 @@ def get_plat():
 def get_version():
     if os.environ.get("ARAVIS_VER") is not None:
         tag = os.environ.get("ARAVIS_VER")
-        tag=tag.replace("v","")
+        if tag.startswith('v'):
+            tag=tag[1:]
     else:
         main_ns = {}
         ver_path = convert_path('./aravis/version.py')
