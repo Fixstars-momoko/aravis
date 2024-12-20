@@ -29,8 +29,6 @@ def get_version():
         tag = os.environ.get("ARAVIS_VER")
         if tag.startswith('v'):
             tag=tag[1:]
-        elif tag.startswith('v.'):
-            tag=tag[2:]
     else:
         main_ns = {}
         ver_path = convert_path('./aravis/version.py')
